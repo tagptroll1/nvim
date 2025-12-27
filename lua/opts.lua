@@ -1,0 +1,15 @@
+vim.o.number = true
+vim.o.relativenumber = true
+vim.o.signcolumn = "yes"
+vim.o.wrap = false
+vim.o.tabstop = 2
+vim.o.shiftwidth = 2
+vim.o.smartindent = true
+vim.o.swapfile = false
+vim.o.undofile = true
+vim.o.ignorecase = true
+vim.o.cursorcolumn = false
+vim.o.incsearch = true
+vim.o.updatetime = 1000
+vim.g.mapleader = " "
+vim.o.winborder = "rounded"
