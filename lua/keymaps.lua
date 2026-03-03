@@ -1,7 +1,10 @@
+local FzfLua = require("fzf-lua")
+
 vim.keymap.set('n', '<leader>o', ':update<CR> :source<CR>')
 vim.keymap.set('n', '<leader>w', ':write<CR>')
 vim.keymap.set('n', '<leader>p', '"_dP')
-vim.keymap.set('n', '<c+u>', '<c+u>zz')
+vim.keymap.set('n', '<C-u>', '<C-u>zz')
+vim.keymap.set('n', '<C-d>', '<C-d>zz')
 vim.keymap.set('n', '<M-j>', 'ddp')
 vim.keymap.set('n', '<M-k>', 'ddkP')
 vim.keymap.set({ 'n', 'v', 'x' }, '<leader>y', '"+y')

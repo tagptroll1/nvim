@@ -1,4 +1,16 @@
-vim.lsp.enable({ "lua_ls", "ts_ls", "svelte", "gopls", "jsonls", "yamlls", "zls"})
+vim.lsp.enable({ 
+	"lua_ls",
+	"ts_ls",
+	"svelte",
+	"gopls",
+	"jsonls",
+	"yamlls",
+	"zls",
+	"html",
+	"cssls",
+	"nginx",
+	"nixd",
+})
 
 -- Configure snippets 
 require("luasnip.loaders.from_vscode").lazy_load()
