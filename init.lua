@@ -14,7 +14,11 @@ vim.pack.add({
 })
 
 require "nvim-treesitter.configs".setup({
-	ensure_installed = { "svelte", "typescript", "javascript", "go" },
+	ensure_installed = {
+		"svelte", "typescript", "javascript", "go",
+		"lua", "nix", "yaml", "json", "html", "css", "zig",
+		"bash", "markdown", -- generally useful on a server
+	},
 	highlight = { enable = true },
 	sync_install = false,
 	auto_install = true,
@@ -49,4 +53,3 @@ require "autocmd"
 
 vim.cmd("colorscheme catppuccin-mocha")
 vim.cmd(":hi statusline guibg=NONE")
-
