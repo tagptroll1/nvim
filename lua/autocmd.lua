@@ -37,3 +37,9 @@ vim.api.nvim_create_autocmd('BufWritePre',{
     })
   end
 })
+
+-- Format nix on save via nixd (nixfmt)
+vim.api.nvim_create_autocmd('BufWritePre', {
+  pattern = { "*.nix" },
+  callback = function() vim.lsp.buf.format() end,
+})

@@ -18,6 +18,7 @@ require "nvim-treesitter.configs".setup({
 		"svelte", "typescript", "javascript", "go",
 		"lua", "nix", "yaml", "json", "html", "css", "zig",
 		"bash", "markdown", -- generally useful on a server
+		"vim", "python", "jsonc", "xml", -- prebuild to avoid on-the-fly compile stalls
 	},
 	highlight = { enable = true },
 	sync_install = false,
