@@ -38,6 +38,16 @@ vim.api.nvim_create_autocmd('BufWritePre',{
   end
 })
 
+-- nvim-treesitter main no longer enables highlighting; start it per buffer when a parser exists
+vim.api.nvim_create_autocmd('FileType', {
+  callback = function(ev)
+    local lang = vim.treesitter.language.get_lang(ev.match)
+    if lang and vim.treesitter.language.add(lang) then
+      vim.treesitter.start(ev.buf, lang)
+    end
+  end,
+})
+
 -- Format nix on save via nixd (nixfmt)
 vim.api.nvim_create_autocmd('BufWritePre', {
   pattern = { "*.nix" },

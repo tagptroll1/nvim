@@ -12,6 +12,8 @@ vim.lsp.enable({
 	"nixd",
 	"bashls",
 	"marksman",
+	"gdscript",
+	"qmlls",
 })
 
 -- Configure snippets

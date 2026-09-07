@@ -4,6 +4,11 @@
       "rev": "3732756",
       "src": "https://github.com/L3MON4D3/LuaSnip"
     },
+    "aether.nvim": {
+      "rev": "567efb778534e11ee1072d4fe27178f705a27d8a",
+      "src": "https://github.com/bjarneo/aether.nvim",
+      "version": "'v3'"
+    },
     "blink.cmp": {
       "rev": "40380e7",
       "src": "https://github.com/Saghen/blink.cmp"
@@ -29,8 +34,9 @@
       "src": "https://github.com/LuxVim/nvim-luxmotion"
     },
     "nvim-treesitter": {
-      "rev": "42fc28ba",
-      "src": "https://github.com/nvim-treesitter/nvim-treesitter"
+      "rev": "61df84986b4b4ec469ee745a182e433d49f8c27e",
+      "src": "https://github.com/nvim-treesitter/nvim-treesitter",
+      "version": "'main'"
     },
     "nvim-web-devicons": {
       "rev": "8dcb311",
