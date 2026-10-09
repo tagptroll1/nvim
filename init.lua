@@ -14,6 +14,8 @@ vim.pack.add({
 	{ src = "https://github.com/L3MON4D3/LuaSnip" },
 	{ src = "https://github.com/rafamadriz/friendly-snippets" },
 	{ src = "https://github.com/Saghen/blink.cmp" },
+	-- C-hjkl crosses nvim splits and tmux panes alike
+	{ src = "https://github.com/christoomey/vim-tmux-navigator" },
 })
 
 -- require "nvim-treesitter".setup({
@@ -21,7 +23,7 @@ vim.pack.add({
 -- })
 
 local ts_languages = {
-	"svelte", "typescript", "javascript", "go",
+	"svelte", "typescript", "javascript", "go", "rust",
 	"lua", "nix", "yaml", "json", "html", "css", "zig",
 	"bash", "markdown", "markdown_inline",
 	"gdscript", "godot_resource", "gdshader",

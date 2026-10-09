@@ -1,5 +1,17 @@
 local FzfLua = require("fzf-lua")
 
+-- tmux owns <C-w>; s and v split the same way as in tmux.conf
+vim.keymap.set('n', '<C-s>s', '<C-w>v', { desc = "Split side by side" })
+vim.keymap.set('n', '<C-s>v', '<C-w>s', { desc = "Split top and bottom" })
+
+vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = "Exit terminal input mode" })
+
+for key, action in pairs({ t = "test", r = "run", b = "build" }) do
+	vim.keymap.set('n', '<leader>l' .. key, function()
+		require('project').run(action)
+	end, { desc = "Project " .. action })
+end
+
 vim.keymap.set('n', '<leader>o', ':update<CR> :source<CR>')
 vim.keymap.set('n', '<leader>w', ':write<CR>')
 vim.keymap.set('n', '<leader>p', '"_dP')

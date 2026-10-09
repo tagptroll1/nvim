@@ -3,6 +3,7 @@ vim.lsp.enable({
 	"ts_ls",
 	"svelte",
 	"gopls",
+	"rust_analyzer",
 	"jsonls",
 	"yamlls",
 	"zls",
