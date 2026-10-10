@@ -1,5 +1,13 @@
 local M = {}
 
+local function marker_for(ft)
+	return ft == "rust" and "Cargo.toml" or ft == "go" and "go.mod" or "package.json"
+end
+
+function M.has_root(buf)
+	return vim.fs.root(buf, marker_for(vim.bo[buf].filetype)) ~= nil
+end
+
 function M.run(action)
 	local saved, err = pcall(vim.cmd, "wall")
 	if not saved then
@@ -8,18 +16,18 @@ function M.run(action)
 	end
 
 	local ft = vim.bo.filetype
-	local marker = ft == "rust" and "Cargo.toml" or ft == "go" and "go.mod" or "package.json"
+	local marker = marker_for(ft)
 	local root = vim.fs.root(0, marker)
 	if not root then
 		vim.notify("No " .. marker .. " found for current buffer", vim.log.levels.WARN)
 		return
 	end
 
-	local cmd
+	local cmd, program, title
 	if ft == "rust" then
 		cmd = { "cargo", action }
 	elseif ft == "go" then
-		cmd = { "go", action, action == "run" and "." or "./..." }
+		cmd = { "go", action == "check" and "vet" or action, action == "run" and "." or "./..." }
 	else
 		local ok, package = pcall(function()
 			return vim.json.decode(table.concat(vim.fn.readfile(root .. "/package.json"), "\n"))
@@ -29,19 +37,34 @@ function M.run(action)
 			return
 		end
 		local scripts = type(package.scripts) == "table" and package.scripts or {}
-		local script = action == "run" and (scripts.dev and "dev" or "start") or action
-		if type(scripts[script]) ~= "string" then
-			vim.notify("No " .. script .. " script in package.json", vim.log.levels.WARN)
+		local wanted = action == "run" and { scripts.dev and "dev" or "start" }
+			or action == "check" and { "check", "lint" }
+			or { action }
+		local manager = vim.fs.root(root, "pnpm-lock.yaml") and "pnpm" or "npm"
+		local steps = {}
+		for _, script in ipairs(wanted) do
+			if type(scripts[script]) == "string" then
+				steps[#steps + 1] = manager .. " run " .. script
+			end
+		end
+		if #steps == 0 then
+			vim.notify("No " .. table.concat(wanted, " or ") .. " script in package.json", vim.log.levels.WARN)
 			return
 		end
-		local manager = vim.fs.root(root, "pnpm-lock.yaml") and "pnpm" or "npm"
-		cmd = { manager, "run", script }
+		program = manager
+		title = table.concat(steps, " && ")
+		-- sh so check can chain whichever of its scripts exist
+		cmd = { "sh", "-c", title }
 	end
-	if vim.fn.executable(cmd[1]) == 0 then
-		vim.notify(cmd[1] .. " is not installed", vim.log.levels.ERROR)
+	program = program or cmd[1]
+	title = title or table.concat(cmd, " ")
+	if vim.fn.executable(program) == 0 then
+		vim.notify(program .. " is not installed", vim.log.levels.ERROR)
 		return
 	end
 
+	-- run may prompt for input, so its keys go to the process instead of dismissing the float
+	local interactive = action == "run"
 	local buf = vim.api.nvim_create_buf(false, true)
 	local width = math.max(1, math.min(math.floor(vim.o.columns * 0.85), vim.o.columns - 4))
 	local height = math.max(1, math.min(math.floor(vim.o.lines * 0.75), vim.o.lines - 4))
@@ -53,13 +76,28 @@ function M.run(action)
 		col = math.max(0, math.floor((vim.o.columns - width) / 2)),
 		style = "minimal",
 		border = "rounded",
-		title = " " .. table.concat(cmd, " ") .. " ",
-		footer = " Any key closes and stops command ",
+		title = " " .. title .. " ",
+		footer = interactive and " Esc, Ctrl+C or click closes and stops command "
+			or " Any key closes and stops command ",
 		footer_pos = "center",
 	})
 	vim.bo[buf].bufhidden = "wipe"
 	local ns = vim.api.nvim_create_namespace("project-run-" .. buf)
 	local job
+	local function close()
+		if vim.api.nvim_win_is_valid(win) then
+			vim.api.nvim_win_close(win, true)
+		end
+	end
+	local function close_on_any_key()
+		-- Consume input so dismissal cannot trigger editor mappings or reach the process.
+		vim.on_key(function()
+			if vim.api.nvim_get_current_win() == win then
+				vim.schedule(close)
+				return ""
+			end
+		end, ns)
+	end
 	vim.api.nvim_create_autocmd("BufWipeout", {
 		buffer = buf,
 		once = true,
@@ -78,27 +116,25 @@ function M.run(action)
 			vim.schedule(function()
 				if vim.api.nvim_win_is_valid(win) then
 					vim.api.nvim_win_set_config(win, { footer = " Exit " .. code .. " | Any key closes " })
+					close_on_any_key()
 				end
 			end)
 		end,
 	})
 	if job <= 0 then
 		vim.api.nvim_win_close(win, true)
-		vim.notify("Failed to start " .. cmd[1], vim.log.levels.ERROR)
+		vim.notify("Failed to start " .. program, vim.log.levels.ERROR)
 		return
 	end
-	vim.cmd.stopinsert()
-	-- Consume input so dismissal cannot trigger editor mappings or reach the process.
-	vim.on_key(function()
-		if vim.api.nvim_get_current_win() == win then
-			vim.schedule(function()
-				if vim.api.nvim_win_is_valid(win) then
-					vim.api.nvim_win_close(win, true)
-				end
-			end)
-			return ""
+	if interactive then
+		for _, key in ipairs({ "<Esc>", "<C-c>", "<LeftMouse>" }) do
+			vim.keymap.set({ "t", "n" }, key, close, { buffer = buf, nowait = true })
 		end
-	end, ns)
+		vim.cmd.startinsert()
+	else
+		vim.cmd.stopinsert()
+		close_on_any_key()
+	end
 end
 
 return M

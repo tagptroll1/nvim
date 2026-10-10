@@ -16,6 +16,8 @@ vim.pack.add({
 	{ src = "https://github.com/Saghen/blink.cmp" },
 	-- C-hjkl crosses nvim splits and tmux panes alike
 	{ src = "https://github.com/christoomey/vim-tmux-navigator" },
+	{ src = "https://github.com/MeanderingProgrammer/render-markdown.nvim" },
+	{ src = "https://github.com/folke/which-key.nvim" },
 })
 
 -- require "nvim-treesitter".setup({
@@ -64,6 +66,16 @@ require "luxmotion".setup({
 		scroll = true,
 	},
 })
+-- off by default so markdown opens as raw source; <leader>m renders per buffer
+require "render-markdown".setup({
+	enabled = false,
+	-- rendered view is read-only, so the cursor line stays rendered too:
+	-- anti_conceal reveals the plugin's marks, concealcursor reveals nvim's own conceals
+	anti_conceal = { enabled = false },
+	win_options = { concealcursor = { rendered = "nvic" } },
+})
+-- helix preset anchors the popup to the lower right instead of a full-width bottom bar
+require "which-key".setup({ preset = "helix" })
 
 require "lsp"
 require "keymaps"
