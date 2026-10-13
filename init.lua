@@ -46,9 +46,25 @@ vim.api.nvim_create_autocmd("FileType", {
 	end,
 })
 require "oil".setup()
+-- pruned by rg itself, so projects without a .gitignore don't walk these trees
+local noise_dirs = {
+	"node_modules", "target", "dist", "build", ".svelte-kit", ".next",
+	"zig-out", ".zig-cache", ".godot", ".direnv", ".venv", "__pycache__", ".cache",
+}
+local noise_glob = [[-g "!{]] .. table.concat(noise_dirs, ",") .. [[}"]]
 require "fzf-lua".setup({
-	keymap = { fzf = { ["ctrl-q"] = "select-all+accept" } }
+	keymap = { fzf = { ["ctrl-q"] = "select-all+accept" } },
+	files = {
+		rg_opts = [[--color=never --files -g "!.git" ]] .. noise_glob,
+	},
+	grep = {
+		-- fzf-lua appends the pattern, so -e has to stay last
+		rg_opts = "--column --line-number --no-heading --color=always --smart-case "
+			.. "--max-columns=4096 " .. noise_glob .. " -e",
+	},
 })
+-- one picker for every vim.ui.select prompt; code actions warn on each call otherwise
+require "fzf-lua".register_ui_select()
 require "luxmotion".setup({
 	cursor = {
 		duration = 100,
