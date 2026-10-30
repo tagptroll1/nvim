@@ -15,6 +15,7 @@ vim.lsp.enable({
 	"marksman",
 	"gdscript",
 	"qmlls",
+	"ruff",
 })
 
 -- Configure snippets

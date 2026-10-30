@@ -1,7 +1,23 @@
 local M = {}
 
 local function marker_for(ft)
-	return ft == "rust" and "Cargo.toml" or ft == "go" and "go.mod" or "package.json"
+	return ft == "rust" and "Cargo.toml" or ft == "go" and "go.mod"
+		or ft == "python" and "pyproject.toml" or "package.json"
+end
+
+-- line scan, since nvim has no TOML parser; only needs section headers and script names
+local function read_pyproject(root)
+	local info, section = {}, nil
+	for _, line in ipairs(vim.fn.readfile(root .. "/pyproject.toml")) do
+		local header = line:match("^%s*%[([^%]]+)%]")
+		if header then
+			section = header
+			info.mypy = info.mypy or header == "tool.mypy"
+		elseif section == "project.scripts" and not info.script then
+			info.script = line:match([[^%s*["']?([%w%._-]+)["']?%s*=]])
+		end
+	end
+	return info
 end
 
 function M.has_root(buf)
@@ -28,6 +44,22 @@ function M.run(action)
 		cmd = { "cargo", action }
 	elseif ft == "go" then
 		cmd = { "go", action == "check" and "vet" or action, action == "run" and "." or "./..." }
+	elseif ft == "python" then
+		local pyproject = read_pyproject(root)
+		local steps = {
+			-- without a [project.scripts] entry, run the current file as a script
+			run = { "uv run " .. (pyproject.script or vim.fn.shellescape(vim.api.nvim_buf_get_name(0))) },
+			test = { "uv run pytest" },
+			build = { "uv build" },
+			-- uv run falls back to PATH, so ruff works from the devshell or as a dev dependency
+			check = { "uv run ruff check" },
+		}
+		if pyproject.mypy then
+			table.insert(steps.check, "uv run mypy .")
+		end
+		program = "uv"
+		title = table.concat(steps[action], " && ")
+		cmd = { "sh", "-c", title }
 	else
 		local ok, package = pcall(function()
 			return vim.json.decode(table.concat(vim.fn.readfile(root .. "/package.json"), "\n"))
