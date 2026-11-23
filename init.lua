@@ -89,6 +89,8 @@ require "render-markdown".setup({
 	-- anti_conceal reveals the plugin's marks, concealcursor reveals nvim's own conceals
 	anti_conceal = { enabled = false },
 	win_options = { concealcursor = { rendered = "nvic" } },
+	-- LSP hover floats are nofile markdown buffers; render them, keep real .md files raw
+	overrides = { buftype = { nofile = { enabled = true } } },
 })
 -- helix preset anchors the popup to the lower right instead of a full-width bottom bar
 require "which-key".setup({ preset = "helix" })

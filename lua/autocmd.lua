@@ -53,3 +53,9 @@ vim.api.nvim_create_autocmd('BufWritePre', {
   pattern = { "*.nix" },
   callback = function() vim.lsp.buf.format() end,
 })
+
+-- rust-analyzer formats via rustfmt, same as cargo fmt but per buffer
+vim.api.nvim_create_autocmd('BufWritePre', {
+  pattern = { "*.rs" },
+  callback = function() vim.lsp.buf.format() end,
+})
